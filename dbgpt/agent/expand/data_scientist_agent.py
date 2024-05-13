@@ -14,6 +14,15 @@ from .actions.chart_action import ChartAction
 
 logger = logging.getLogger(__name__)
 
+"""
+"请仔细检查生成的 SQL。请严格遵守给定的数据结构定义。禁止使用不存在的字段和数据值。不要从表 A 使用字段到表 B。您可以执行多表相关查询。"
+
+"If the data and fields that need to be analyzed in the target are in different tables, it is recommended to use multi-table correlation queries first, and pay attention to the correlation between multiple table structures."
+
+"禁止自行构建数据作为查询条件。如果要查询特定字段，如果字段的值已提供，则可以对字段执行分组统计查询。"
+
+"请选择一种适合的数据显示方式进行数据显示。如果找不到合适的显示类型，则默认使用表格显示。支持的显示类型：\n{{ display_type }}"
+"""
 
 class DataScientistAgent(ConversableAgent):
     """Data Scientist Agent."""

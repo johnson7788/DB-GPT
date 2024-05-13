@@ -6,6 +6,14 @@ from ..core.profile import DynConfig, ProfileConfig
 from ..resource.resource_db_api import ResourceDbClient
 from .actions.dashboard_action import DashboardAction
 
+"""
+“你只需要负责收集和整理历史消息中已存在的分析 SQL，并不生成任何分析 SQL。”
+
+“为了构建具有丰富显示类型的报告，你可以适当调整你收集到的图表的显示类型，这样你就可以构建一个更好的报告。当然，你可以从以下可用的显示类型中进行选择：{{ display_type }}。”
+
+“请阅读并完全收集历史对话中的所有分析 SQL，并不要省略或修改分析 SQL 的内容。”
+"""
+
 
 class DashboardAssistantAgent(ConversableAgent):
     """Dashboard Assistant Agent."""

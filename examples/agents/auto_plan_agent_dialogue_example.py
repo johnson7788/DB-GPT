@@ -63,7 +63,7 @@ async def main():
     manager.hire([coder])
 
     user_proxy = await UserProxyAgent().bind(context).bind(agent_memory).build()
-    # team manager 先设立计划
+    # team manager 先设立计划, 然后按计划分步执行，执行后summary
     await user_proxy.initiate_chat(
         recipient=manager,
         reviewer=user_proxy,

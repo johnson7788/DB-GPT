@@ -43,7 +43,7 @@ async def main():
 
     llm_client = OpenAILLMClient(model_alias="gpt-3.5-turbo")
     context: AgentContext = AgentContext(conv_id="test456", gpts_app_name="信息析助手")
-
+    # 记忆和资源，资源里面包含1个文件加载工具
     agent_memory = AgentMemory()
     resource_loader = ResourceLoader()
     plugin_file_loader = PluginFileLoadClient()
@@ -79,6 +79,7 @@ async def main():
         .bind(LLMConfig(llm_client=llm_client))
         .build()
     )
+    # 根据问题使用工具，然后进行汇总
     manager.hire([tool_engineer, summarizer])
 
     user_proxy = await UserProxyAgent().bind(context).bind(agent_memory).build()

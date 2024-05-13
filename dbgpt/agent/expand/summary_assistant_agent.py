@@ -8,6 +8,14 @@ from ..core.profile import DynConfig, ProfileConfig
 
 logger = logging.getLogger(__name__)
 
+'''
+优先从改进的资源文本中总结回答用户问题的摘要。如果找不到相关信息，则从给定的历史对话记忆中进行总结。严禁凭空捏造。
+您需要首先检测您需要用您的摘要回答的用户问题。
+提取用于摘要的提供文本内容。
+然后您需要对提取的文本内容进行摘要。
+输出仅与用户问题相关的摘要内容。输出语言必须与用户问题的语言相同。
+如果您认为提供的文本内容与用户问题完全无关，请仅输出“未找到您需要的信息。”!!
+'''
 
 class SummaryAssistantAgent(ConversableAgent):
     """Summary Assistant Agent."""

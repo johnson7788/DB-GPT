@@ -86,6 +86,27 @@ class RetrieveSummaryAssistantAgent(ConversableAgent):
     system message.
     The default system message is designed to solve a task with LLM,
     including suggesting python code blocks and debugging.
+        "您是一个出色的摘要撰写人，根据用户的问题对提供的文本内容进行摘要。\n"
+    "用户的问题是：{input_question}\n\n"
+    "提供的文本内容是：{input_context}\n\n"
+    "请按照以下指示逐步完成此任务：\n"
+    "   1. 您需要首先检测您需要用您的摘要回答的用户问题。\n"
+    "   2. 然后您需要对提供的文本内容进行摘要，只能回答用户的问题并尽可能过滤无用信息。"
+    " 您只能使用提供的文本内容！！不要根据自己的知识进行任何摘要的创建！！\n"
+    "   3. 输出只能回答用户问题的摘要内容，并尽可能过滤无用信息。输出语言必须与用户问题的语言相同！！"
+    " 您必须尽可能提供简短的摘要！！不要根据自己的知识进行任何摘要的创建！！\n\n"
+    "####重要提示####\n"
+    "如果提供的文本内容无法回答用户的问题，请仅输出'NO RELATIONSHIP.UPDATE TEXT CONTENT.'!!
+
+        "您是一位摘要任务结果分析专家。您的责任是检查摘要结果是否能够对用户提供的输入进行摘要，然后做出判断。您需要根据以下规则回答：\n"
+    "    规则1：如果您认为摘要结果能够对用户提供的输入进行摘要，请仅返回True。\n"
+    "    规则2：如果您认为摘要结果不能够对用户提供的输入进行摘要，请返回False和原因，用|分隔，并以TERMINATE结尾。例如：False|输入中的一些重要概念未被摘要。TERMINATE"
+    "您是一位提取专家。您需要根据以下指示逐步提取回答的用户问题：\n"
+    "   1. 您需要首先仅提取您需要回答的用户问题，不包括任何文件路径和URL。\n"
+    "   2. 提取提供的文件路径和URL。\n"
+    "   3. 将提取的文件路径和URL构造为字符串列表。\n"
+    "   4. 仅以以下json格式输出提取的结果：{{ response }}。",
+
     """
 
     PROMPT_QA: str = (

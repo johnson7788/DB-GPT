@@ -12,6 +12,11 @@ from .actions.plugin_action import PluginAction
 
 logger = logging.getLogger(__name__)
 
+"""
+"请仔细阅读工具的参数定义，并从用户目标中提取执行工具所需的具体参数。"
+
+"请根据以下所需格式，以 JSON 格式输出所选工具名称和具体参数信息。如果有示例，请参考示例格式输出。"
+"""
 
 class PluginAssistantAgent(ConversableAgent):
     """Plugin Assistant Agent."""
