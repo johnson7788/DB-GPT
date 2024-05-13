@@ -35,6 +35,15 @@ from dbgpt.util.utils import (
     setup_logging,
 )
 
+"""
+导入必要的模块和依赖。
+创建 FastAPI 应用程序对象。
+挂载静态文件目录，用于服务于 Swagger UI 和其他静态文件。
+定义了一系列路由挂载函数，用于将不同功能模块的路由注册到应用程序中。
+定义了一些辅助函数，如参数解析、应用程序初始化等。
+最后，通过 run_webserver() 函数启动 FastAPI 应用程序。
+"""
+
 ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(ROOT_PATH)
 
@@ -64,7 +73,7 @@ system_app = SystemApp(app)
 
 
 def mount_routers(app: FastAPI):
-    """Lazy import to avoid high time cost"""
+    """Lazy import to avoid high time cost, 定义了一系列的路由挂载函数，将不同功能模块的路由注册到应用程序中。"""
     from dbgpt.app.knowledge.api import router as knowledge_router
     from dbgpt.app.llm_manage.api import router as llm_manage_api
     from dbgpt.app.openapi.api_v1.api_v1 import router as api_v1
