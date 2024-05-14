@@ -32,7 +32,7 @@
                     "conv_uid": "uuid_conv_copilot_1234",
                     "chat_mode": "chat_with_code"
                 },
-                "messages": "SELECT * FRM orders WHERE order_amount > 500;"
+                "messages": "SELECT * FROM orders WHERE order_amount > 500;"
             }'
 
 """
