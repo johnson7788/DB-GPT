@@ -107,7 +107,7 @@ class BaseOperatorMeta(ABCMeta):
                 kwargs["system_app"] = system_app
             if not kwargs.get("executor"):
                 kwargs["executor"] = executor
-            real_obj = func(self, *args, **kwargs)
+            real_obj = func(self, *args, **kwargs) # 真正的运行函数的地方，可以在这里加断点
             return real_obj
 
         return cast(F, apply_defaults)
