@@ -8,13 +8,12 @@ from dbgpt.configs.model_config import MODEL_PATH, PILOT_PATH
 from dbgpt.core import LLMClient, ModelMessage, ModelMessageRoleType, ModelRequest
 from dbgpt.core.awel import DAG, HttpTrigger, JoinOperator, MapOperator
 from dbgpt.datasource.rdbms.base import RDBMSConnector
-from dbgpt.datasource.rdbms.conn_sqlite import SQLiteTempConnector
 from dbgpt.model.proxy import OpenAILLMClient
 from dbgpt.rag.embedding import DefaultEmbeddingFactory
-from dbgpt.rag.operators.schema_linking import SchemaLinkingOperator
-from dbgpt.storage.vector_store.chroma_store import ChromaVectorConfig
-from dbgpt.storage.vector_store.connector import VectorStoreConnector
 from dbgpt.util.chat_util import run_async_tasks
+from dbgpt_ext.datasource.rdbms.conn_sqlite import SQLiteTempConnector
+from dbgpt_ext.rag.operators.schema_linking import SchemaLinkingOperator
+from dbgpt_ext.storage.vector_store.chroma_store import ChromaStore, ChromaVectorConfig
 
 """AWEL: Simple nl-schemalinking-sql-chart operator example
 
@@ -52,16 +51,15 @@ INPUT_PROMPT = "\n###Input:\n{}\n###Response:"
 
 def _create_vector_connector():
     """Create vector connector."""
-    return VectorStoreConnector.from_default(
-        "Chroma",
-        vector_store_config=ChromaVectorConfig(
-            name="vector_name",
-            persist_path=os.path.join(PILOT_PATH, "data"),
-        ),
+    config = ChromaVectorConfig(
+        persist_path=PILOT_PATH,
+        name="embedding_rag_test",
         embedding_fn=DefaultEmbeddingFactory(
             default_model_name=os.path.join(MODEL_PATH, "text2vec-large-chinese"),
         ).create(),
     )
+
+    return ChromaStore(config)
 
 
 def _create_temporary_connection():
@@ -234,7 +232,7 @@ with DAG("simple_nl_schema_sql_chart_example") as dag:
     )
     request_handle_task = RequestHandleOperator()
     query_operator = MapOperator(lambda request: request["query"])
-    llm = OpenAILLMClient()
+    llm = (OpenAILLMClient(api_key=os.getenv("OPENAI_API_KEY", "your api key")),)
     model_name = "gpt-3.5-turbo"
     retriever_task = SchemaLinkingOperator(
         connector=_create_temporary_connection(), llm=llm, model_name=model_name

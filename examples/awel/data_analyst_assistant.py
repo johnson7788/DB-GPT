@@ -36,6 +36,7 @@
             }'
 
 """
+
 import logging
 import os
 from functools import cache
@@ -53,19 +54,24 @@ from dbgpt.core import (
     PromptTemplate,
     SystemPromptTemplate,
 )
-from dbgpt.core.awel import DAG, HttpTrigger, JoinOperator, MapOperator
+from dbgpt.core.awel import (
+    DAG,
+    BranchJoinOperator,
+    HttpTrigger,
+    JoinOperator,
+    MapOperator,
+)
 from dbgpt.core.operators import (
     BufferedConversationMapperOperator,
     HistoryDynamicPromptBuilderOperator,
     LLMBranchOperator,
-    RequestBuilderOperator,
 )
 from dbgpt.model.operators import (
     LLMOperator,
     OpenAIStreamingOutputOperator,
     StreamingLLMOperator,
 )
-from dbgpt.serve.conversation.operators import ServePreChatHistoryLoadOperator
+from dbgpt_serve.conversation.operators import ServePreChatHistoryLoadOperator
 
 logger = logging.getLogger(__name__)
 
@@ -237,8 +243,8 @@ class PromptTemplateBuilderOperator(MapOperator[TriggerReqBody, ChatPromptTempla
         self._default_prompt_manager = PromptManager()
 
     async def map(self, input_value: TriggerReqBody) -> ChatPromptTemplate:
-        from dbgpt.serve.prompt.serve import SERVE_APP_NAME as PROMPT_SERVE_APP_NAME
-        from dbgpt.serve.prompt.serve import Serve as PromptServe
+        from dbgpt_serve.prompt.serve import SERVE_APP_NAME as PROMPT_SERVE_APP_NAME
+        from dbgpt_serve.prompt.serve import Serve as PromptServe
 
         prompt_serve = self.system_app.get_component(
             PROMPT_SERVE_APP_NAME, PromptServe, default_component=None
@@ -318,7 +324,6 @@ with DAG("dbgpt_awel_data_analyst_assistant") as dag:
     )
 
     prompt_template_load_task = PromptTemplateBuilderOperator()
-    request_handle_task = RequestBuilderOperator()
 
     # Load and store chat history
     chat_history_load_task = ServePreChatHistoryLoadOperator()
@@ -343,9 +348,7 @@ with DAG("dbgpt_awel_data_analyst_assistant") as dag:
     )
     model_parse_task = MapOperator(lambda out: out.to_dict())
     openai_format_stream_task = OpenAIStreamingOutputOperator()
-    result_join_task = JoinOperator(
-        combine_function=lambda not_stream_out, stream_out: not_stream_out or stream_out
-    )
+    result_join_task = BranchJoinOperator()
     trigger >> prompt_template_load_task >> history_prompt_build_task
 
     (

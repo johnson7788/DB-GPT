@@ -4,8 +4,6 @@ from typing import Optional
 
 from dbgpt.configs.model_config import MODEL_PATH, PILOT_PATH, ROOT_PATH
 from dbgpt.core import Embeddings
-from dbgpt.rag import ChunkParameters
-from dbgpt.rag.assembler import EmbeddingAssembler
 from dbgpt.rag.embedding import DefaultEmbeddingFactory
 from dbgpt.rag.evaluation import RetrieverEvaluator
 from dbgpt.rag.evaluation.retriever import (
@@ -13,10 +11,11 @@ from dbgpt.rag.evaluation.retriever import (
     RetrieverMRRMetric,
     RetrieverSimilarityMetric,
 )
-from dbgpt.rag.knowledge import KnowledgeFactory
-from dbgpt.rag.operators import EmbeddingRetrieverOperator
-from dbgpt.storage.vector_store.chroma_store import ChromaVectorConfig
-from dbgpt.storage.vector_store.connector import VectorStoreConnector
+from dbgpt_ext.rag import ChunkParameters
+from dbgpt_ext.rag.assembler import EmbeddingAssembler
+from dbgpt_ext.rag.knowledge import KnowledgeFactory
+from dbgpt_ext.rag.operators import EmbeddingRetrieverOperator
+from dbgpt_ext.storage.vector_store.chroma_store import ChromaStore, ChromaVectorConfig
 
 
 def _create_embeddings(
@@ -28,17 +27,16 @@ def _create_embeddings(
     ).create()
 
 
-def _create_vector_connector(
-    embeddings: Embeddings, space_name: str = "retriever_evaluation_example"
-) -> VectorStoreConnector:
+def _create_vector_connector():
     """Create vector connector."""
-    return VectorStoreConnector.from_default(
-        "Chroma",
-        vector_store_config=ChromaVectorConfig(
-            name=space_name,
-            persist_path=os.path.join(PILOT_PATH, "data"),
-        ),
-        embedding_fn=embeddings,
+    config = ChromaVectorConfig(
+        persist_path=PILOT_PATH,
+    )
+
+    return ChromaStore(
+        config,
+        name="embedding_rag_test",
+        embedding_fn=_create_embeddings(),
     )
 
 
@@ -52,7 +50,7 @@ async def main():
     assembler = EmbeddingAssembler.load_from_knowledge(
         knowledge=knowledge,
         chunk_parameters=chunk_parameters,
-        vector_store_connector=vector_connector,
+        index_store=vector_connector,
     )
     assembler.persist()
 
@@ -76,7 +74,7 @@ async def main():
         embeddings=embeddings,
         operator_kwargs={
             "top_k": 5,
-            "vector_store_connector": vector_connector,
+            "index_store": vector_connector,
         },
     )
     metrics = [

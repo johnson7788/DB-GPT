@@ -1,7 +1,8 @@
 import { CaretRightOutlined, CheckOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { GPTVis } from '@antv/gpt-vis';
 import { Collapse } from 'antd';
-import ReactMarkdown from 'react-markdown';
-import markdownComponents from './config';
+
+import markdownComponents, { markdownPlugins, preprocessLaTeX } from './config';
 
 interface Props {
   data: {
@@ -19,24 +20,28 @@ function AgentPlans({ data }: Props) {
   return (
     <Collapse
       bordered
-      className="my-3"
+      className='my-3'
       expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
       items={data.map((item, index) => {
         return {
           key: index,
           label: (
-            <div className="whitespace-normal">
+            <div>
               <span>
                 {item.name} - {item.agent}
               </span>
               {item.status === 'complete' ? (
-                <CheckOutlined className="!text-green-500 ml-2" />
+                <CheckOutlined className='!text-green-500 ml-2' />
               ) : (
-                <ClockCircleOutlined className="!text-gray-500 ml-2" />
+                <ClockCircleOutlined className='!text-gray-500 ml-2' />
               )}
             </div>
           ),
-          children: <ReactMarkdown components={markdownComponents}>{item.markdown}</ReactMarkdown>,
+          children: (
+            <GPTVis components={markdownComponents} {...markdownPlugins}>
+              {preprocessLaTeX(item.markdown)}
+            </GPTVis>
+          ),
         };
       })}
     />

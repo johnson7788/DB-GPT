@@ -50,19 +50,19 @@ Example:
 
 import asyncio
 
-from dbgpt.client import Client
+from dbgpt_client import Client
 
 
 async def main():
     # initialize client
     DBGPT_API_KEY = "dbgpt"
     client = Client(api_key=DBGPT_API_KEY)
-
-    async for data in client.chat_stream(
-        model="chatgpt_proxyllm",
-        messages="hello",
-    ):
-        print(data)
+    data = await client.chat(model="Qwen2.5-72B-Instruct", messages="hello")
+    # async for data in client.chat_stream(
+    #     model="chatgpt_proxyllm",
+    #     messages="hello",
+    # ):
+    print(data)
 
     # res = await client.chat(model="chatgpt_proxyllm" ,messages="hello")
     # print(res)

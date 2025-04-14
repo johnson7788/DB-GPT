@@ -2,12 +2,11 @@ import asyncio
 import os
 
 from dbgpt.configs.model_config import MODEL_PATH, PILOT_PATH, ROOT_PATH
-from dbgpt.rag import ChunkParameters
-from dbgpt.rag.assembler import EmbeddingAssembler
 from dbgpt.rag.embedding import DefaultEmbeddingFactory
-from dbgpt.rag.knowledge import KnowledgeFactory
-from dbgpt.storage.vector_store.chroma_store import ChromaVectorConfig
-from dbgpt.storage.vector_store.connector import VectorStoreConnector
+from dbgpt_ext.rag import ChunkParameters
+from dbgpt_ext.rag.assembler import EmbeddingAssembler
+from dbgpt_ext.rag.knowledge import KnowledgeFactory
+from dbgpt_ext.storage.vector_store.chroma_store import ChromaStore, ChromaVectorConfig
 
 """Embedding rag example.
     pre-requirements:
@@ -24,12 +23,13 @@ from dbgpt.storage.vector_store.connector import VectorStoreConnector
 
 def _create_vector_connector():
     """Create vector connector."""
-    return VectorStoreConnector.from_default(
-        "Chroma",
-        vector_store_config=ChromaVectorConfig(
-            name="db_schema_vector_store_name",
-            persist_path=os.path.join(PILOT_PATH, "data"),
-        ),
+    config = ChromaVectorConfig(
+        persist_path=PILOT_PATH,
+    )
+
+    return ChromaStore(
+        config,
+        name="embedding_rag_test",
         embedding_fn=DefaultEmbeddingFactory(
             default_model_name=os.path.join(MODEL_PATH, "text2vec-large-chinese"),
         ).create(),
@@ -39,13 +39,13 @@ def _create_vector_connector():
 async def main():
     file_path = os.path.join(ROOT_PATH, "docs/docs/awel/awel.md")
     knowledge = KnowledgeFactory.from_file_path(file_path)
-    vector_connector = _create_vector_connector()
+    vector_store = _create_vector_connector()
     chunk_parameters = ChunkParameters(chunk_strategy="CHUNK_BY_SIZE")
     # get embedding assembler
     assembler = EmbeddingAssembler.load_from_knowledge(
         knowledge=knowledge,
         chunk_parameters=chunk_parameters,
-        vector_store_connector=vector_connector,
+        index_store=vector_store,
     )
     assembler.persist()
     # get embeddings retriever

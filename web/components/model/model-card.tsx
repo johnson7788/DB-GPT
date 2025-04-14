@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import { apiInterceptors, stopModel } from '@/client/api';
 import { IModelData } from '@/types/model';
-import { useTranslation } from 'react-i18next';
+import { MODEL_ICON_MAP } from '@/utils';
+import { PauseCircleOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 import moment from 'moment';
-import { apiInterceptors, stopModel } from '@/client/api';
+import { useTranslation } from 'react-i18next';
 import GptCard from '../common/gpt-card';
-import { PauseCircleOutlined } from '@ant-design/icons';
-import { MODEL_ICON_MAP } from '@/utils';
+
+import { useState } from 'react';
 
 interface Props {
   info: IModelData;
@@ -16,6 +17,7 @@ function ModelCard({ info }: Props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(false);
 
+  // TODO：unused function
   async function stopTheModel(info: IModelData) {
     if (loading) {
       return;
@@ -26,7 +28,7 @@ function ModelCard({ info }: Props) {
         host: info.host,
         port: info.port,
         model: info.model_name,
-        worker_type: info.model_type,
+        worker_type: info.worker_type,
         params: {},
       }),
     );
@@ -35,9 +37,10 @@ function ModelCard({ info }: Props) {
       message.success(t('stop_model_success'));
     }
   }
+
   return (
     <GptCard
-      className="w-96"
+      className='w-96'
       title={info.model_name}
       tags={[
         {
@@ -45,15 +48,15 @@ function ModelCard({ info }: Props) {
           color: info.healthy ? 'green' : 'red',
           border: true,
         },
-        info.model_type,
+        info.worker_type,
       ]}
       icon={MODEL_ICON_MAP[info.model_name]?.icon || '/models/huggingface.svg'}
       operations={[
         {
           children: (
             <div>
-              <PauseCircleOutlined className="mr-2" />
-              <span className="text-sm">Stop Model</span>
+              <PauseCircleOutlined className='mr-2' />
+              <span className='text-sm'>Stop Model</span>
             </div>
           ),
           onClick: () => {
@@ -62,20 +65,20 @@ function ModelCard({ info }: Props) {
         },
       ]}
     >
-      <div className="flex flex-col gap-1 px-4 pb-4 text-xs">
-        <div className="flex overflow-hidden">
-          <p className="w-28 text-gray-500 mr-2">Host:</p>
-          <p className="flex-1 text-ellipsis">{info.host}</p>
+      <div className='flex flex-col gap-1 px-4 pb-4 text-xs'>
+        <div className='flex overflow-hidden'>
+          <p className='w-28 text-gray-500 mr-2'>Host:</p>
+          <p className='flex-1 text-ellipsis'>{info.host}</p>
         </div>
-        <div className="flex overflow-hidden">
-          <p className="w-28 text-gray-500 mr-2">Manage Host:</p>
-          <p className="flex-1 text-ellipsis">
+        <div className='flex overflow-hidden'>
+          <p className='w-28 text-gray-500 mr-2'>Manage Host:</p>
+          <p className='flex-1 text-ellipsis'>
             {info.manager_host}:{info.manager_port}
           </p>
         </div>
-        <div className="flex overflow-hidden">
-          <p className="w-28 text-gray-500 mr-2">Last Heart Beat:</p>
-          <p className="flex-1 text-ellipsis">{moment(info.last_heartbeat).format('YYYY-MM-DD')}</p>
+        <div className='flex overflow-hidden'>
+          <p className='w-28 text-gray-500 mr-2'>Last Heart Beat:</p>
+          <p className='flex-1 text-ellipsis'>{moment(info.last_heartbeat).format('YYYY-MM-DD HH:mm:ss')}</p>
         </div>
       </div>
     </GptCard>

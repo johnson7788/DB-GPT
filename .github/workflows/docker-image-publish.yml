@@ -16,6 +16,16 @@ jobs:
     if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v3
+      - name: free disk space
+        run: |
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo apt clean
+          # Only delete Docker images when they exist
+          if [ ! -z "$(docker image ls -aq)" ]; then
+            docker rmi $(docker image ls -aq)
+          fi
+          df -h
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -30,6 +40,8 @@ jobs:
         with:
           context: .
           file: ./docker/base/Dockerfile
+          build-args: |
+            PIP_INDEX_URL=https://pypi.org/simple
           platforms: linux/amd64
           push: true
           tags: eosphorosai/dbgpt:${{ github.ref_name }},eosphorosai/dbgpt:latest
