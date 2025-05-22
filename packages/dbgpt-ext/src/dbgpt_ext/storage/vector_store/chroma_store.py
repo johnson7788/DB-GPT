@@ -139,15 +139,21 @@ class ChromaStore(VectorStoreBase):
             )
         collection_metadata = collection_metadata or {"hnsw:space": "cosine"}
 
-        self._collection = self._chroma_client.get_or_create_collection(
-            name=self._collection_name,
-            embedding_function=None,
-            metadata=collection_metadata,
+        self._collection = self.create_collection(
+            collection_name=self._collection_name,
+            collection_metadata=collection_metadata,
         )
 
     def get_config(self) -> ChromaVectorConfig:
         """Get the vector store config."""
         return self._vector_store_config
+
+    def create_collection(self, collection_name: str, **kwargs) -> Any:
+        return self._chroma_client.get_or_create_collection(
+            name=collection_name,
+            embedding_function=None,
+            metadata=kwargs.get("collection_metadata"),
+        )
 
     def similar_search(
         self, text, topk, filters: Optional[MetadataFilters] = None
@@ -272,12 +278,25 @@ class ChromaStore(VectorStoreBase):
             logger.error(f"Error during vector store deletion: {e}")
             raise
 
-    def delete_by_ids(self, ids):
-        """Delete vector by ids."""
-        logger.info(f"begin delete chroma ids: {ids}")
-        ids = ids.split(",")
-        if len(ids) > 0:
-            self._collection.delete(ids=ids)
+    def delete_by_ids(self, ids, batch_size: int = 1000):
+        """Delete vector by ids in batches.
+
+        Args:
+            ids (str): Comma-separated string of IDs to delete.
+            batch_size (int): Number of IDs per batch. Default is 1000.
+        """
+        logger.info(f"begin delete chroma ids in batches (batch size: {batch_size})")
+        id_list = ids.split(",")
+        total = len(id_list)
+        logger.info(f"Total IDs to delete: {total}")
+
+        for i in range(0, total, batch_size):
+            batch_ids = id_list[i : i + batch_size]
+            logger.info(f"Deleting batch {i // batch_size + 1}: {len(batch_ids)} IDs")
+            try:
+                self._collection.delete(ids=batch_ids)
+            except Exception as e:
+                logger.error(f"Failed to delete batch starting at index {i}: {e}")
 
     def truncate(self) -> List[str]:
         """Truncate data index_name."""
